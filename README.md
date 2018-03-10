@@ -1,7 +1,7 @@
-# The imgurpython project is no longer supported.
-
 imgurpython
 ===========
+
+Note: This fork picks up where the original left off. After the authors abandoned their original, a number of PRs came in and I'll merge them here.
 
 A Python client for the [Imgur API](http://api.imgur.com/). It can be used to
 interact with the Imgur API in your projects.
