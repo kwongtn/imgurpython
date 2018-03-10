@@ -1,6 +1,7 @@
 import base64
 import requests
 from .imgur.models.tag import Tag
+from .imgur.models.topic import Topic
 from .imgur.models.album import Album
 from .imgur.models.image import Image
 from .imgur.models.account import Account
@@ -184,6 +185,18 @@ class ImgurClient(object):
             account_data['pro_expiration'],
         )
 
+    def get_account_by_id(self, userid):
+        account_data = self.make_request('GET', 'account/?account_id=%i' % userid)
+
+        return Account(
+            account_data['id'],
+            account_data['url'],
+            account_data['bio'],
+            account_data['reputation'],
+            account_data['created'],
+            account_data['pro_expiration'],
+        )
+
     def get_gallery_favorites(self, username, page=0):
         self.validate_user_context(username)
         gallery_favorites = self.make_request('GET', 'account/%s/gallery_favorites/%d' % (username, page))
@@ -283,13 +296,17 @@ class ImgurClient(object):
         images = self.make_request('GET', 'album/%s/images' % album_id)
         return [Image(image) for image in images]
 
+    def get_album_image(self, album_id, image_id):
+        image = self.make_request('GET', 'album/%s/image/%s' % (album_id, image_id))
+        return Image(image)
+
     def create_album(self, fields):
         post_data = {field: fields[field] for field in set(self.allowed_album_fields).intersection(fields.keys())}
 
-        if 'ids' in post_data:
-            self.logged_in()
-
-        return self.make_request('POST', 'album', data=post_data)
+        if self.auth is None:
+            return self.make_request('POST', 'album', post_data, True)
+        else:
+            return self.make_request('POST', 'album', post_data)
 
     def update_album(self, album_id, fields):
         post_data = {field: fields[field] for field in set(self.allowed_album_fields).intersection(fields.keys())}
@@ -552,9 +569,9 @@ class ImgurClient(object):
         response = self.make_request('GET', 'gallery/%s' % item_id)
         return build_gallery_images_and_albums(response)
 
-    def report_gallery_item(self, item_id):
+    def report_gallery_item(self, item_id, reason):
         self.logged_in()
-        return self.make_request('POST', 'gallery/%s/report' % item_id)
+        return self.make_request('POST', 'gallery/%s/report' % item_id, {'reason': reason})
 
     def gallery_item_vote(self, item_id, vote='up'):
         self.logged_in()
@@ -578,9 +595,6 @@ class ImgurClient(object):
     def get_image(self, image_id):
         image = self.make_request('GET', 'image/%s' % image_id)
         return Image(image)
-
-    def upload_from_base64(self, encoded_string, config=None, anon=True):
-        return self.upload(encoded_string, config, anon)
 
     def upload_from_path(self, path, config=None, anon=True):
         with open(path, 'rb') as fd:
@@ -614,6 +628,13 @@ class ImgurClient(object):
 
     def delete_image(self, image_id):
         return self.make_request('DELETE', 'image/%s' % image_id)
+
+    def update_image(self, image_id, fields):
+        '''
+        Note: Can only update title or description of image
+        '''
+        post_data = {field: fields[field] for field in set({'title', 'description'}).intersection(fields.keys())}
+        return self.make_request('POST', 'image/%s' % image_id, data=post_data)
 
     def favorite_image(self, image_id):
         self.logged_in()
@@ -684,3 +705,20 @@ class ImgurClient(object):
     def default_memes(self):
         response = self.make_request('GET', 'memegen/defaults')
         return [Image(meme) for meme in response]
+
+    # Topic-related endpoints
+    def default_topics(self):
+        topics = self.make_request('GET', 'topics/defaults')
+        return [Topic(topic) for topic in topics]
+
+    def gallery_topic(self, topic_id, sort='viral', page=0, windown='week'):
+        if sort == 'top':
+            response = self.make_request('GET', 'topics/%s/%s/%s/%d' % (topic_id, sort, window, page))
+        else:
+            response = self.make_request('GET', 'topics/%s/%s/%d' % (topic_id, sort, page))
+
+        return build_gallery_images_and_albums(response)
+
+    def gallery_topic_item(self, topic_id, item_id):
+        response = self.make_request('GET', 'topics/%s/%s' % (topic_id, item_id))
+        return build_gallery_images_and_albums(response)
