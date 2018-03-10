@@ -65,12 +65,12 @@ for album in client.get_account_albums('me'):
     album_title = album.title if album.title else 'Untitled'
     print('Album: {0} ({1})'.format(album_title, album.id))
 
-for image in client.get_album_images(album.id):
-    image_title = image.title if image.title else 'Untitled'
-    print('\t{0}: {1}'.format(image_title, image.link))
+    for image in client.get_album_images(album.id):
+        image_title = image.title if image.title else 'Untitled'
+        print('\t{0}: {1}'.format(image_title, image.link))
 
-# Save some API credits by not getting all albums
-break
+    # Save some API credits by not getting all albums
+    break
 ```
 
 ***Output***
