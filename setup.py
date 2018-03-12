@@ -11,17 +11,17 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # http://packaging.python.org/en/latest/tutorial.html#version
-    version='1.1.7',
+    version='1.1.9',
 
-    description='Official Imgur python library with OAuth2 and samples',
-    long_description='',
+    description='Imgur python library with OAuth2 and samples',
+    long_description='Forked and patched version, now maintained!',
 
     # The project's main homepage.
     url='https://github.com/Imgur/imgurpython',
 
     # Author details
-    author='Imgur Inc.',
-    author_email='api@imgur.com',
+    author='BryanH',
+    author_email='BryanH@example.com',
 
     # Choose your license
     license='MIT',
@@ -47,6 +47,7 @@ setup(
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.6',
     ],
 
     # What does your project relate to?
