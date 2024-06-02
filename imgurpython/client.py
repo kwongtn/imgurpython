@@ -22,7 +22,7 @@ MASHAPE_URL = 'https://imgur-apiv3.p.mashape.com/'
 
 
 class AuthWrapper(object):
-    def __init__(self, access_token, refresh_token, client_id, client_secret):
+    def __init__(self, access_token, refresh_token, client_id, client_secret, api_url=None):
         self.current_access_token = access_token
 
         if refresh_token is None:
@@ -31,6 +31,7 @@ class AuthWrapper(object):
         self.refresh_token = refresh_token
         self.client_id = client_id
         self.client_secret = client_secret
+        self.api_url = api_url if api_url is not None else API_URL
 
     def get_refresh_token(self):
         return self.refresh_token
@@ -46,7 +47,7 @@ class AuthWrapper(object):
             'grant_type': 'refresh_token'
         }
 
-        url = API_URL + 'oauth2/token'
+        url = self.api_url + 'oauth2/token'
 
         response = requests.post(url, data=data)
 
@@ -95,7 +96,7 @@ class ImgurClient(object):
         return self.make_request('GET', 'credits', None, True)
 
     def get_auth_url(self, response_type='pin'):
-        return '%soauth2/authorize?client_id=%s&response_type=%s' % (API_URL, self.client_id, response_type)
+        return '%soauth2/authorize?client_id=%s&response_type=%s' % (self.api_url, self.client_id, response_type)
 
     def authorize(self, response, grant_type='pin'):
         return self.make_request('POST', 'oauth2/token', {
@@ -126,7 +127,7 @@ class ImgurClient(object):
         method_to_call = getattr(requests, method)
 
         header = self.prepare_headers(force_anon)
-        url = (MASHAPE_URL if self.mashape_key is not None else API_URL) + ('3/%s' % route if 'oauth2' not in route else route)
+        url = (MASHAPE_URL if self.mashape_key is not None else self.api_url) + ('3/%s' % route if 'oauth2' not in route else route)
 
         if method in ('delete', 'get'):
             response = method_to_call(url, headers=header, params=data, data=data)
