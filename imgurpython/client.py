@@ -100,7 +100,7 @@ class ImgurClient(object):
         access_token=None,
         refresh_token=None,
         mashape_key=None,
-        api_url=None,
+        api_url=API_URL,
     ):
         self.client_id = client_id
         self.client_secret = client_secret
